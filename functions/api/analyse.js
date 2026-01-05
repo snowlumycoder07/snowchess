@@ -10,10 +10,11 @@ export async function onRequest(context) {
   const wsUrl = "wss://analysis.chess.com/"
 
   const ws = new WebSocket(wsUrl)
+  let payload;
 
   return new Promise((resolve, reject) => {
     ws.onopen = () => {
-      const payload = {"action":"gameAnalysis","game":{"pgn":pgn},"options":{"caps2":true,"depth":25,"engineType":"stockfish16 nnue","source":{"gameId":"","gameType":"live","url":"","token":token,"client":"web","userTimeZone":"Asia/Calcutta"},"strength":"Fast","tep":{"ceeDebug":true,"classificationv3":true,"nullMoveRepresentation":"--","basicVariationThemes":false,"speechv3":false,"userColor":"black","lang":"en_US","coachLocale":"en-US","coachTextId":"Generic_coach"}}}
+      payload = {"action":"gameAnalysis","game":{"pgn":pgn},"options":{"caps2":true,"depth":25,"engineType":"stockfish16 nnue","source":{"gameId":"","gameType":"live","url":"","token":token,"client":"web","userTimeZone":"Asia/Calcutta"},"strength":"Fast","tep":{"ceeDebug":true,"classificationv3":true,"nullMoveRepresentation":"--","basicVariationThemes":false,"speechv3":false,"userColor":"black","lang":"en_US","coachLocale":"en-US","coachTextId":"Generic_coach"}}}
 
 
       ws.send(JSON.stringify(payload))
