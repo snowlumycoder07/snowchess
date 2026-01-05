@@ -423,7 +423,7 @@ document.querySelector('.tab-btn[data-tab="analysis"]').classList.remove('hidden
     }
     return response.json();
   })
-  .then(data => {
+  .then(data.data => {
     
     // console.log(data.positions[0].classificationName);
     // console.log("history index is",historyIndex , data.positions.);
