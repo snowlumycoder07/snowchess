@@ -11,7 +11,7 @@ export async function onRequest(context) {
   
   const toke= await gentoken()
   
-  const token= toke.body
+  const { token } = toke.body.json()
 
   const wsUrl = "wss://analysis.chess.com/"
 
