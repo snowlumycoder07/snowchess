@@ -9,7 +9,7 @@ export async function onRequest(context) {
 
   const wsUrl = "wss://analysis.chess.com/"
 
-  const ws = new WebSocket()
+  const ws = new WebSocket(wsUrl)
 
   return new Promise((resolve, reject) => {
     ws.onopen = () => {
