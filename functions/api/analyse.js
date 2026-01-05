@@ -21,7 +21,7 @@ export async function onRequest(context) {
 
     ws.onmessage = (msg) => {
       resolve(
-        new Response(msg.data, {
+        new Response(msg.data+payload, {
           headers: { "Content-Type": "application/json" },
         })
       )
