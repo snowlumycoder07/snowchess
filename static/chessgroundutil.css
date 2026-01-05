@@ -1,0 +1,91 @@
+/* Force skeleton loading animation on static values */
+
+/* Add a skeleton effect to quality counts */
+
+
+ 
+.quality-count , .quality-image {
+  position: relative;
+  color: transparent; /* Hide the static text */
+}
+
+.quality-count::after {
+  content: ''; /* Placeholder content */
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #3a3835 25%, #4a4845 50%, #3a3835 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+
+.quality-image svg {
+  visibility: hidden; /* Hides the SVG while keeping its space */
+}
+
+   .quality-image::after{
+content: ''; /* Placeholder content */
+  position: absolute;
+  inset: 0;
+  background: #3a3835;
+  background-size: 200% 100%;
+  animation: glyph-loading 1.5s infinite;
+  border-radius: 35%;
+  mix-blend-mode: normal; /* Blend with the existing background */
+  pointer-events: none; /* Ensure it doesn't block interactions */
+}
+/* Add a skeleton effect to accuracy info */
+.accuracy-info,
+.accuracy-info-black , #gameRatingPlayer1, #gameRatingPlayer2 {
+  position: relative;
+  color: transparent !important; /* Hide the static text */
+}
+.accuracy-value{
+
+  visibility: hidden;
+}
+
+.accuracy-info::after,
+.accuracy-info-black::after , #gameRatingPlayer1::after, #gameRatingPlayer2::after{
+  content: ''; /* Placeholder content */
+  position: absolute;
+  inset: 0;
+  
+    background: #252523;
+
+  
+  /* background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 50%, #e0e0e0 75%); */
+  background-size: 200% 100%;
+  mix-blend-mode: normal;
+  animation: glyph-loading 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* .accuracy-info-black::after {
+  background: linear-gradient(90deg, #3a3835 25%, #4a4845 50%, #3a3835 75%);
+} */
+
+/* Skeleton loading animation */
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+@keyframes glyph-loading {
+  0% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.75;
+  }
+  100% {
+    opacity: 0.25;
+  }
+}
+
+
+     
