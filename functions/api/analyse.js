@@ -22,17 +22,15 @@ export async function onRequest(context) {
 
     ws.onmessage = (msg) => {
     
-     const data = msg.data
-     if (typeof data === "string" && data.startsWith('{"action":"analyzeGame"')) {
-    
+      
       resolve(
-        new Response(msg.data+JSON.stringify(payload), {
+        new Response(msg.data+typeof(msg.data), {
           headers: { "Content-Type": "application/json" },
         })
       )
       ws.close()
     }
-    }
+    
 
     ws.onerror = (err) => {
       reject(new Response("WebSocket error", { status: 500 }))
