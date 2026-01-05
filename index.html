@@ -1,0 +1,1051 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="utf-8" />
+  <title>Chessground Demo (JS piece injection)</title>
+  <link rel="stylesheet" href="/static/chessground.base.css">
+  <link id="skeleton-loading-css" rel="stylesheet" href="/static/chessgroundutil.css">
+  
+  <link rel="stylesheet" href="/static/chessground.brown.css">
+  <link rel="stylesheet" href="/static/chessground.cburnett.css">
+ 
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+
+      /* background: #f0f0f0; */
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      /* margin-bottom: 25%; */
+      overflow: hidden;
+      background-color: #302e2b;
+    }
+    
+    /* Header Bar */
+    header {
+      /* background: #fff; */
+      border-bottom: 1px solid #ddd;
+      padding: 12px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+    
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .header-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .header-buttons button {
+      padding: 8px 16px;
+      border: 1px solid #ddd;
+      /* background: #fff; */
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.2s;
+    }
+    
+    .header-buttons button:hover {
+      /* background: #f5f5f5; */
+    }
+    
+    /* Main Container */
+    .main-container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      padding-bottom: 20%;
+      @media (orientation: landscape) {
+        padding-bottom: 5%;
+      }
+      gap: 20px;
+    }
+    
+    /* Board Section - Centered */
+    .board-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      /* max-width: 600px; */
+      width: 45%;
+      @media (orientation: portrait) {
+        width: 90%;
+      }
+      flex-shrink: 0;
+    }
+    
+    /* Player Bar Top */
+    .player-bar {
+      /* background: #fff; */
+      /* border: 1px solid #ddd; */
+      border-radius: 6px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    
+    .player-bar.top {
+      justify-content: space-between;
+    }
+    
+    .player-bar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+    
+    .player-bar-avatar {
+      width: 32px;
+      height: 32px;
+      /* border-radius: 50%; */
+      /* background: #ddd; */
+      display: flex;
+      overflow: hidden;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #666;
+      font-size: 16px;
+    }
+    
+    .player-bar-info h4 {
+      font-size: 14px;
+      margin: 0;
+      color: #ffffffeb;
+    }
+    
+    .player-bar-info p {
+      font-size: 12px;
+      color: #999;
+      margin: 0;
+    }
+    
+    .player-bar-rating {
+      font-size: 13px;
+      font-weight: bold;
+      /* color: #5a8cce; */
+      color: #9b9a99;
+    }
+    
+    /* Board Container */
+    .board-container {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      /* background: #fff; */
+      /* border: 1px solid #ddd; */
+      border-radius: 6px;
+      aspect-ratio: 1;
+      /* min-height: 400px; */
+      width: 100%;
+      flex-shrink: 0;
+    }
+    
+    #board {
+      width: 100%;
+      height: 100%;
+    }
+    
+    /* Control Bar */
+    .control-bar {
+      /* background: #fff; */
+      /* border: 1px solid #ddd; */
+      border-radius: 6px;
+      background-color: #00000066;
+      padding: 12px 16px;
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    
+    .control-bar button {
+      padding: 10px 20px;
+      border: none;
+      background: #454340;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.2s;
+      /* min-width: 100px; */
+    }
+    
+    .control-bar button:hover {
+      background: #f5f5f58a;
+      /* border-color: #999; */
+    }
+    
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-left: auto;
+    }
+    
+    .action-buttons button {
+      padding: 10px 20px;
+      border: none;
+      background: #5a8cce;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+    
+    .action-buttons button:hover {
+      background: #4a7cbe;
+    }
+    
+    /* Analysis Container Below Board */
+    .analysis-container {
+      /* background: #fff; */
+      /* border: 1px solid #ddd; */
+      background-color: #21201e;
+      border-radius: 6px;
+      padding: 20px;
+      flex-shrink: 0;
+      min-width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .analysis-header {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      /* border-bottom: 1px solid #eee; */
+      padding-bottom: 15px;
+      flex-shrink: 0;
+      overflow: auto;
+    }
+    
+    .tab-btn {
+      padding: 8px 16px;
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #999;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    
+    .tab-btn.active {
+      color: #5a8cce;
+      border-bottom-color: #5a8cce;
+    }
+    
+    .tab-btn:hover {
+      color: #333;
+    }
+    
+    /* Tab Content */
+    .tab-content {
+      display: none;
+      flex-direction: column;
+      gap: 15px;
+      min-height: 0;
+    }
+    
+    .tab-content.active {
+      display: flex;
+    }
+    
+    /* Analysis Section */
+    .analysis-section {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      overflow-y: auto;
+      /* padding-right: 10px; */
+      color: hsl(0deg 0% 100% / 59%);
+    }
+    
+    .analysis-section h3 {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+      margin: 0;
+    }
+    
+    /* Accuracy Card */
+    .accuracy-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 8px;
+      padding: 20px;
+      color: white;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    
+   
+    
+    
+    /* Move Quality Stats */
+    
+    
+    
+    .quality-item.brilliant {
+      border-left-color: #00d4aa;
+      background: #f0fdfb;
+    }
+    
+    .quality-item.good {
+      border-left-color: #5a8cce;
+      background: #f0f5ff;
+    }
+    
+    .quality-item.inaccuracy {
+      border-left-color: #ffc107;
+      background: #fffbf0;
+    }
+    
+    .quality-item.mistake {
+      border-left-color: #ff6b6b;
+      background: #fff5f5;
+    }
+    
+    .quality-item.blunder {
+      border-left-color: #d32f2f;
+      background: #ffebee;
+    }
+    
+    .quality-icon {
+      font-size: 16px;
+      min-width: 24px;
+    }
+    
+    .quality-info {
+      flex: 1;
+    }
+    
+    .quality-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: hsl(0deg 0% 100% / 59%);
+      margin: 0;
+    }
+    
+   
+    
+    .quality-count.brilliant { color: #00d4aa; }
+    .quality-count.good { color: #5a8cce; }
+    .quality-count.inaccuracy { color: #ffc107; }
+    .quality-count.mistake { color: #ff6b6b; }
+    .quality-count.blunder { color: #d32f2f; }
+    
+    /* Position Analysis */
+    .position-analysis {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px;
+      flex-shrink: 0;
+    }
+    
+    .position-analysis h4 {
+      font-size: 13px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .evaluation-bar {
+      display: flex;
+      height: 24px;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    
+    .evaluation-white {
+      background: #fff;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    .evaluation-black {
+      background: #333;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: bold;
+      color: #fff;
+    }
+    
+    .position-status {
+      font-size: 12px;
+      color: #666;
+      padding: 8px;
+      background: #fff;
+      border-radius: 4px;
+      text-align: center;
+    }
+    
+    .status-winning { color: #00d4aa; font-weight: bold; }
+    .status-advantage { color: #5a8cce; font-weight: bold; }
+    .status-equal { color: #666; }
+    .status-disadvantage { color: #ffc107; font-weight: bold; }
+    .status-losing { color: #d32f2f; font-weight: bold; }
+    
+    /* Move Comments Box */
+    .move-comments-box {
+      background: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 12px;
+      flex-shrink: 0;
+    }
+    
+    .move-comments-box h4 {
+      font-size: 13px;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    .current-move-info {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      padding: 10px;
+      margin-bottom: 8px;
+    }
+    
+    .move-notation {
+      font-size: 18px;
+      font-weight: bold;
+      color: #5a8cce;
+      margin-bottom: 5px;
+      font-family: monospace;
+    }
+    
+    .best-move-indicator {
+      background: #e8f5e9;
+      border-left: 3px solid #4caf50;
+      padding: 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    
+    .best-move-indicator.is-best {
+      background: #c8e6c9;
+    }
+    
+    .best-move-label {
+      font-size: 12px;
+      font-weight: bold;
+      color: #4caf50;
+      margin-bottom: 4px;
+    }
+    
+    .best-move-notation {
+      font-size: 16px;
+      font-weight: bold;
+      color: #2e7d32;
+      font-family: monospace;
+    }
+    
+    .move-comment {
+      font-size: 12px;
+      color: #666;
+      line-height: 1.4;
+      padding: 8px;
+      background: #fff;
+      border-radius: 4px;
+      border-left: 3px solid #ffc107;
+      font-style: italic;
+    }
+    
+    /* Moves Section */
+    .moves-list {
+      /* background: #f9f9f9; */
+      /* border: 1px solid #ddd; */
+      border-radius: 6px;
+      color: #d2d2d2;
+      font-weight: bold;
+      padding: 10px;
+      overflow-y: auto;
+      font-size: 12px;
+      font-family: monospace;
+      flex: 1;
+      min-height: 200px;
+    }
+    
+    .move-item {
+      padding: 5px;
+      margin: 3px 0;
+      background: #fff;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .move-item:hover {
+      background: #e3f2fd;
+    }
+    
+    .move-item.selected {
+      background: #5a8cce;
+      color: white;
+    }
+    
+    /* Game Review Specific Styles */
+    .game-review-header {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    
+    .accuracy-bar {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+    }
+    
+    .player-accuracy {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .player-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ddd;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    
+    .accuracy-info {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .player-name {
+      font-size: 14px;
+      font-weight: bold;
+      color: #333;
+    }
+    
+    
+    
+    .game-rating {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    
+    .start-review {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    
+    #startReviewButton {
+      padding: 10px 20px;
+      background: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    
+    #startReviewButton:hover {
+      background: #388e3c;
+    }
+  </style>
+</head>
+<body >
+  <script src="http://localhost:35729/livereload.js?snipver=1"></script>
+
+
+  <!-- Header -->
+  <!-- <header>
+    <div class="logo">♟ ChessEngine</div>
+    <div class="header-buttons">
+      <button>New Game</button>
+      <button>Settings</button>
+      <button>Help</button>
+    </div>
+  </header> -->
+
+  <!-- Main Container -->
+  <div class="main-container">
+    <!-- Board Section -->
+    <div class="board-section">
+      <!-- Black Player Bar -->
+      <div class="player-bar top">
+        <div class="player-bar-left">
+          <div class="player-bar-avatar black-avt">♙</div>
+          <div class="player-bar-info">
+            <h4 id="blackPlayer">Black Player</h4>
+            <div class="player-bar-rating" id="blackRating">(1800)</div>
+            
+          </div>
+        </div>
+
+        <div class="player-bar-right clock black hidden">
+
+          <div class="clock black" id="black-clock">3:00</div>
+        </div>
+
+        <!-- <div class="player-bar-rating" id="blackRating">1800</div> -->
+      </div>
+
+      <!-- Board -->
+      <div class="board-container">
+        <button id="flip-btn">
+          <svg style="width:16px;height:16px;fill:rgba(255, 255, 255, 0.801)" viewBox="0 0 24 24" >
+            <use href="#flip-btn-svg"></use>
+          </svg>
+        </button>
+        <div id="board"></div>
+      </div>
+
+      <!-- White Player Bar -->
+      <div class="player-bar">
+        <div class="player-bar-left ">
+          <div class="player-bar-avatar white-avt">♗</div>
+          <div class="player-bar-info">
+            <h4 id="whitePlayer">White Player</h4>
+            <div class="player-bar-rating" id="whiteRating">(1800)</div>
+           
+          </div>
+
+        </div>
+
+
+
+        <div class="player-bar-right clock hidden">
+
+          <div class="clock" id="white-clock">3:00</div>
+          </div>
+        
+      </div>
+
+      <!-- Control Bar -->
+      <div class="control-bar">
+        <button id="startBtn">
+          <svg style="fill: hwb(0deg 100% 0% / 63%);" aria-hidden="true" class="rtl-support" data-glyph="media-play" viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path xmlns="http://www.w3.org/2000/svg" d="M6.07001 22H5.94001C4.34001 22 4.01001 21.67 4.01001 20.07V3.94C4.01001 2.34 4.34001 2.01 5.94001 2.01H6.07001C7.67001 2.01 8.00001 2.34 8.00001 3.94V20.07C8.00001 21.67 7.67001 22 6.07001 22ZM19.93 21.13L19.86 21.2C18.73 22.33 18.26 22.33 17.13 21.2L10.73 14.83C9.00001 13.06 9.00001 10.93 10.73 9.16L17.13 2.79C18.26 1.66 18.73 1.66 19.86 2.79L19.93 2.86C21.06 3.99 21.06 4.46 19.93 5.59L13.56 11.99L19.93 18.39C21.06 19.52 21.06 19.99 19.93 21.12V21.13Z"></path></svg>
+
+        </button>
+        <button id="backward">
+          <svg style="fill: hwb(0deg 100% 0% / 63%);" aria-hidden="true" class="rtl-support" data-glyph="arrow-chevron-left" viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path xmlns="http://www.w</svg>3.org/2000/svg" d="M16.27 21.13L16.2 21.2C15.07 22.33 14.6 22.33 13.47 21.2L7.06996 14.83C5.33996 13.06 5.33996 10.93 7.06996 9.16L13.47 2.79C14.6 1.66 15.07 1.66 16.2 2.79L16.27 2.86C17.4 3.99 17.4 4.46 16.27 5.59L9.89996 11.99L16.27 18.39C17.4 19.52 17.4 19.99 16.27 21.12V21.13Z"></path></svg>
+
+        </button>
+        <button id="forward">
+          <svg style="fill: hwb(0deg 100% 0% / 63%);" aria-hidden="true" class="rtl-support" data-glyph="arrow-chevron-right" viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path xmlns="http://www.w3.org/2000/svg" d="M7.73007 2.87L7.80007 2.8C8.93007 1.67 9.40007 1.67 10.5301 2.8L16.9301 9.17C18.6601 10.94 18.6601 13.07 16.9301 14.84L10.5301 21.21C9.40007 22.34 8.93007 22.34 7.80007 21.21L7.73007 21.14C6.60007 20.01 6.60007 19.54 7.73007 18.41L14.1001 12.01L7.73007 5.61C6.60007 4.48 6.60007 4.01 7.73007 2.88V2.87Z"></path></svg>
+
+        </button>
+        <button id="endBtn">
+          <svg style="fill: hwb(0deg 100% 0% / 63%);" aria-hidden="true" class="rtl-support" data-glyph="media-end" viewBox="0 0 24 24" height="24" width="24" xmlns="http://www.w3.org/2000/svg"><path xmlns="http://www.w3.org/2000/svg" d="M17.9299 2H18.0599C19.6599 2 19.9899 2.33 19.9899 3.93V20.06C19.9899 21.66 19.6599 21.99 18.0599 21.99H17.9299C16.3299 21.99 15.9999 21.66 15.9999 20.06V3.93C15.9999 2.33 16.3299 2 17.9299 2ZM4.06991 2.87L4.13991 2.8C5.26991 1.67 5.73991 1.67 6.86991 2.8L13.2699 9.17C14.9999 10.94 14.9999 13.07 13.2699 14.84L6.86991 21.21C5.73991 22.34 5.26991 22.34 4.13991 21.21L4.06991 21.14C2.93991 20.01 2.93991 19.54 4.06991 18.41L10.4399 12.01L4.06991 5.61C2.93991 4.48 2.93991 4.01 4.06991 2.88V2.87Z"></path></svg>
+          </button>
+        <!-- <div class="action-buttons">
+          <button>Resign</button>
+          <button>Draw</button>
+        </div> -->
+      </div>
+
+      <!-- Analysis Container Below Board -->
+      <div class="analysis-container skelt">
+        <!-- Tab Headers -->
+        <div class="analysis-header">
+          <button class="tab-btn hidden" data-tab="analysis">Analysis</button>
+          <button class="tab-btn active" data-tab="search">Search using ID</button>
+          <button class="tab-btn" data-tab="moves">Moves</button>
+          <button class="tab-btn " data-tab="newpgn">Load PGN</button>
+          
+        </div>
+
+        <div id="search" class="tab-content active">
+          <input id="idInput" autocomplete="on" placeholder="Search by Game ID" style="width: 100%; padding: 10px; border:none; background-color: #454340; color: #d2d2d2; font-weight: bold; height: 2%; border-radius: 5px;"></input>
+          <button id="search-btn" style="margin-top: 10px; padding: 10px; border: none; background-color: #5a8cce; color: white; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold;">Search</button>
+            <div class="search-result">
+                </div>
+        </div>
+
+
+        <div id="newpgn" class="tab-content ">
+          <textarea id="pgnInput" 
+    placeholder="Paste the PGN here" style="width: 100%; padding: 10px; border:none; background-color: #454340; color: #d2d2d2; font-weight: bold; height: 15vh; border-radius: 5px;">
+</textarea>
+<button id="loadPgnButton" style="margin-top: 10px; padding: 10px; border: none; background-color: #5a8cce; color: white; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold;">Load PGN</button>
+
+          </div>
+          
+
+        <!-- Analysis Tab -->
+        <div id="analysis" class="tab-content ">
+          <div class="analysis-section page1 hidden" >
+
+            
+              <button id="backToReviewBtn" style="padding: 3px;width: min-content;background-color: transparent; border: none; cursor: pointer; ">
+                <svg style="width:20px;height:20px;fill:rgba(255, 255, 255, 0.716)" viewBox="0 0 20 20" width="20" height="20">
+                      <use href="#back-nav"></use>
+                    </svg>
+              </button>
+
+            
+
+            <div class="move-feedback">
+              <div id="move-feedback-icon"></div>
+
+                <div id="move-feedback-text"></div>
+
+                <div id="move-feedback-evaluation"></div>
+              
+              </div>
+
+              <button id="bestmovebtn" class="hidden">Best</button>
+
+          </div>
+            
+          <div class="analysis-section page0 ">
+            <!-- Game Review Header -->
+            <div class="game-review-header">
+              <div style="font-size: 16px; font-weight: bold; margin-bottom: 10px;">Game Review</div>
+              <div class="player-name-analysis" > 
+                <span class="playerNameHeader"></span>
+                <span class="playerNameHeader pl1">White</span>
+                <span class="playerNameHeader pl2">Black</span>
+
+
+
+
+              </div>
+              <div class="accuracy-bar">
+                <div class="accuracy-label">Accuracy</div>
+                <div class="player-accuracy">
+                 
+                  <div class="accuracy-info">
+                    <!-- <p class="player-name" id="player1Name">ArtemDyachuk</p> -->
+                    <p class="accuracy-value" id="player1Accuracy">85.6</p>
+                  </div>
+                </div>
+                <div class="player-accuracy">
+                  
+                  <div class="accuracy-info-black accuracy-info">
+                    <!-- <p class="player-name" id="player2Name">MagnusCarlsen</p> -->
+                    <p class="accuracy-value" id="player2Accuracy">90.1</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Move Quality Stats -->
+            <div class="move-quality-stats">
+              <div class="quality-item">
+                <p class="quality-name">Brilliant</p>
+                <div class="quality-count-wrapper">
+                  <p class="quality-count" id="brilliantCountPlayer1">0</p>
+                  <div class="quality-image">
+                    <svg viewBox="0 0 20 20" width="20" height="20">
+                      <use href="#icon-brilliant"></use>
+                    </svg></div>
+                  <p class="quality-count" id="brilliantCountPlayer2">0</p>
+                </div>
+              </div>
+              <div class="quality-item">
+                <p class="quality-name">Great</p>
+                <div class="quality-count-wrapper">
+                  <p class="quality-count" id="greatCountPlayer1">3</p>
+                  <div class="quality-image">
+                    <svg viewBox="0 0 20 20" width="20" height="20">
+                      <use href="#icon-greatFind"></use>
+                    </svg></div>
+                  <p class="quality-count" id="greatCountPlayer2">3</p>
+                </div>
+              </div>
+              <div class="quality-item">
+                <p class="quality-name">Best</p>
+                <div class="quality-count-wrapper">
+                  <p class="quality-count" id="bestCountPlayer1">19</p>
+                  <div class="quality-image"><svg viewBox="0 0 20 20" width="20" height="20"><use href="#icon-best"></use></svg></div>
+                  <p class="quality-count" id="bestCountPlayer2">24</p>
+                </div>
+              </div>
+
+             
+
+              <div class="quality-item">
+                <p class="quality-name">Excellent</p>
+                <div class="quality-count-wrapper">
+                  <p class="quality-count" id="excellentCountPlayer1">6</p>
+                  <div class="quality-image">
+                    <svg viewBox="0 0 20 20" width="20" height="20">
+                    <use href="#icon-excellent"></use>
+                    </svg></div>
+                  <p class="quality-count" id="excellentCountPlayer2">1</p>
+                </div>
+              </div>
+
+
+              <div class="quality-item">
+                <p class="quality-name">Good</p>
+                <div class="quality-count-wrapper">
+                  <p class="quality-count" id="goodCountPlayer1">19</p>
+                  <div class="quality-image"><svg viewBox="0 0 20 20" width="20" height="20">
+                      <use href="#icon-good"></use>
+
+                  </svg></div>
+                  <p class="quality-count" id="goodCountPlayer2">24</p>
+                </div>
+              </div>
+              <div class="quality-item">
+                <p class="quality-name">Book</p>
+                <div class="quality-count-wrapper">
+                  <p class="quality-count" id="bookCountPlayer1">19</p>
+                  <div class="quality-image"><svg viewBox="0 0 20 20" width="20" height="20">
+                      <use href="#icon-book"></use>
+
+                  </svg></div>
+                  <p class="quality-count" id="bookCountPlayer2">24</p>
+                </div>
+              </div>
+
+              <div class="quality-item">
+                <p class="quality-name">Inaccuracy</p>
+                <div class="quality-count-wrapper">
+                  <p class="quality-count" id="inaccuracyCountPlayer1">19</p>
+                  <div class="quality-image"><svg viewBox="0 0 20 20" width="20" height="20">
+                     <use href="#icon-inaccuracy"></use>
+
+
+                  </svg></div>
+                  <p class="quality-count" id="inaccuracyCountPlayer2">24</p>
+                </div>
+              </div>
+              <div class="quality-item">
+                <p class="quality-name">Mistake</p>
+                <div class="quality-count-wrapper">
+                  <p class="quality-count" id="mistakeCountPlayer1">19</p>
+                  <div class="quality-image"><svg viewBox="0 0 20 20" width="20" height="20">
+                      <use href="#icon-mistake"></use>
+                  </svg></div>
+                  <p class="quality-count" id="mistakeCountPlayer2">24</p>
+                </div>
+              </div>
+
+
+              <div class="quality-item">
+                <p class="quality-name">Miss</p>
+                <div class="quality-count-wrapper">
+                  <p class="quality-count" id="missCountPlayer1">1</p>
+                  <div class="quality-image"><svg viewBox="0 0 20 20" viewBox="0 0 20 20" width="20" height="20">
+                      <use href="#icon-miss"></use>
+
+                  </svg></div>
+                  <p class="quality-count" id="missCountPlayer2">1</p>
+                </div>
+              </div>
+              <div class="quality-item">
+                <p class="quality-name">Blunder</p>
+                <div class="quality-count-wrapper">
+                  <p class="quality-count" id="blunderCountPlayer1">1</p>
+                  <div class="quality-image"><svg viewBox="0 0 20 20" width="20" height="20">
+                      <use href="#icon-blunder"></use>
+
+                  </svg></div>
+                  <p class="quality-count" id="blunderCountPlayer2">1</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Game Rating -->
+            <div class="game-rating">
+              <p>Game Rating</p>
+              <p id="gameRatingPlayer1">2850</p>
+              <p id="gameRatingPlayer2" >3350</p>
+            </div>
+
+            <!-- Start Review Button -->
+            <div class="start-review">
+              <button id="startReviewButton">Start Review</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Moves Tab -->
+        <div id="moves" class="tab-content">
+          <div class="moves-list" id="movesList">
+            1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Tab switching functionality
+   
+    // Example usage:
+    // updateAnalysisData({
+    //   accuracy: 92,
+    //   brilliant: 5,
+    //   good: 12,
+    //   inaccuracy: 3,
+    //   mistake: 2,
+    //   blunder: 1
+    // });
+
+    // updateMoveAnalysis({
+    //   notation: 'e4',
+    //   bestMove: 'e4',
+    //   isBest: true,
+    //   comment: 'This opening move controls the center and is one of the strongest responses.',
+    //   moveNumber: 1,x
+    //   color: 'White'd
+    // });
+  </script>
+  
+  <!-- Load your utils JS -->
+  <script type="module" src="/static/util1.js"></script>
+
+
+
+
+
+
+
+  <svg xmlns="http://www.w3.org/2000/svg"
+     style="position:absolute;width:0;height:0;overflow:hidden">
+
+
+
+     <symbol id="icon-inaccuracy" viewBox="0 0 20 20">
+      <path class="icon-component" fill="#fff" d="M13.66,14.3a.28.28,0,0,1,0,.13.23.23,0,0,1-.08.11.28.28,0,0,1-.11.08l-.12,0h-2l-.13,0a.27.27,0,0,1-.1-.08A.36.36,0,0,1,11,14.3V12.4a.59.59,0,0,1,0-.13.36.36,0,0,1,.07-.1l.1-.08.13,0h2a.33.33,0,0,1,.23.1.39.39,0,0,1,.08.1.28.28,0,0,1,0,.13Zm-.12-3.93a.31.31,0,0,1,0,.13.3.3,0,0,1-.07.1.3.3,0,0,1-.23.08H11.43a.31.31,0,0,1-.34-.31L10.94,3.6A.5.5,0,0,1,11,3.36l.11-.08.13,0h2.11a.35.35,0,0,1,.26.1.41.41,0,0,1,.08.24Z"></path>
+      <path class="icon-component" fill="#fff" d="M7.65,14.32a.27.27,0,0,1,0,.12.26.26,0,0,1-.07.11l-.1.07-.13,0H5.43a.25.25,0,0,1-.12,0,.27.27,0,0,1-.1-.08.31.31,0,0,1-.09-.22V12.49a.36.36,0,0,1,.09-.23l.1-.07.12,0H7.32a.32.32,0,0,1,.23.09.3.3,0,0,1,.07.1.28.28,0,0,1,0,.13Zm2.2-7.17a3.1,3.1,0,0,1-.36.73,5.58,5.58,0,0,1-.49.6A4.85,4.85,0,0,1,8.48,9a8,8,0,0,0-.65.63,1,1,0,0,0-.27.7v.22a.21.21,0,0,1,0,.12.17.17,0,0,1-.06.1.23.23,0,0,1-.1.07l-.12,0H5.53a.21.21,0,0,1-.12,0,.18.18,0,0,1-.1-.07.2.2,0,0,1-.08-.1.37.37,0,0,1,0-.12v-.35a2.68,2.68,0,0,1,.13-.84,2.91,2.91,0,0,1,.33-.66,3.38,3.38,0,0,1,.45-.55c.16-.15.33-.29.49-.42a7.84,7.84,0,0,0,.65-.64,1,1,0,0,0,.25-.67.77.77,0,0,0-.07-.34.67.67,0,0,0-.23-.27,1.16,1.16,0,0,0-.72-.24A1.61,1.61,0,0,0,6,5.61a3,3,0,0,0-.41.18A1.75,1.75,0,0,0,5.3,6l-.11.09A.5.5,0,0,1,5,6.12.31.31,0,0,1,4.74,6l-1-1.21a.3.3,0,0,1,0-.4A1.36,1.36,0,0,1,4,4.18a3.07,3.07,0,0,1,.56-.38,5.49,5.49,0,0,1,.9-.37,3.69,3.69,0,0,1,1.19-.17A3.92,3.92,0,0,1,8.93,4a2.85,2.85,0,0,1,.77.92A2.82,2.82,0,0,1,10,6.21,3,3,0,0,1,9.85,7.15Z"></path>
+      </symbol>
+
+      <symbol id="icon-mistake" viewBox="0 0 20 20">
+         <path class="icon-component" fill="#fff" d="M9.92,14.52a.27.27,0,0,1,0,.12.41.41,0,0,1-.07.11.32.32,0,0,1-.23.09H7.7a.25.25,0,0,1-.12,0,.27.27,0,0,1-.1-.08.31.31,0,0,1-.09-.22V12.69a.32.32,0,0,1,.09-.23l.1-.07.12,0H9.59a.32.32,0,0,1,.23.09.61.61,0,0,1,.07.1.28.28,0,0,1,0,.13Zm2.2-7.17a3.1,3.1,0,0,1-.36.73,5.58,5.58,0,0,1-.49.6,6,6,0,0,1-.52.49,8,8,0,0,0-.65.63,1,1,0,0,0-.27.7v.22a.24.24,0,0,1,0,.12.17.17,0,0,1-.06.1.3.3,0,0,1-.1.07l-.12,0H7.79l-.12,0a.3.3,0,0,1-.1-.07.26.26,0,0,1-.07-.1.37.37,0,0,1,0-.12v-.35a2.42,2.42,0,0,1,.13-.84,2.55,2.55,0,0,1,.33-.66,3.38,3.38,0,0,1,.45-.55c.16-.15.33-.29.49-.42a7.73,7.73,0,0,0,.64-.64,1,1,0,0,0,.26-.67.77.77,0,0,0-.07-.34A.75.75,0,0,0,9.48,6a1.16,1.16,0,0,0-.72-.24,1.61,1.61,0,0,0-.49.07A3,3,0,0,0,7.86,6a1.41,1.41,0,0,0-.29.18l-.11.09a.5.5,0,0,1-.24.06A.31.31,0,0,1,7,6.19L6,5a.29.29,0,0,1,0-.4,1.36,1.36,0,0,1,.21-.2A3.07,3.07,0,0,1,6.81,4a5.38,5.38,0,0,1,.89-.37,3.75,3.75,0,0,1,1.2-.17,4.07,4.07,0,0,1,1.2.19,4,4,0,0,1,1.09.56,2.76,2.76,0,0,1,.78.92,2.82,2.82,0,0,1,.28,1.28A3,3,0,0,1,12.12,7.35Z"></path>
+      </symbol>
+
+      <symbol id="icon-miss" viewBox="0 0 20 20">
+         <path class="cls-1" style="fill: #f1f2f2;" d="M13.99,12.01s.06,.08,.08,.13c.02,.05,.03,.1,.03,.15s-.01,.1-.03,.15c-.02,.05-.05,.09-.08,.13l-1.37,1.37s-.08,.06-.13,.08c-.05,.02-.1,.03-.15,.03s-.1-.01-.15-.03c-.05-.02-.09-.05-.13-.08l-3.06-3.06-3.06,3.06s-.08,.06-.13,.08c-.05,.02-.1,.03-.15,.03s-.1-.01-.15-.03c-.05-.02-.09-.05-.13-.08l-1.37-1.37c-.07-.07-.11-.17-.11-.28s.04-.2,.11-.28l3.06-3.06-3.06-3.06c-.07-.07-.11-.17-.11-.28s.04-.2,.11-.28l1.37-1.37c.07-.07,.17-.11,.28-.11s.2,.04,.28,.11l3.06,3.06,3.06-3.06c.07-.07,.17-.11,.28-.11s.2,.04,.28,.11l1.37,1.37s.06,.08,.08,.13c.02,.05,.03,.1,.03,.15s-.01,.1-.03,.15c-.02,.05-.05,.09-.08,.13l-3.06,3.06,3.06,3.06Z"></path>
+         </symbol>
+
+      <symbol id="icon-blunder" viewBox="0 0 20 20">
+        <path class="icon-component" fill="#fff" d="M14.74,5A2.58,2.58,0,0,0,14,4a3.76,3.76,0,0,0-1.09-.56,4.07,4.07,0,0,0-1.2-.19,3.92,3.92,0,0,0-1.18.17,5.87,5.87,0,0,0-.9.37,3,3,0,0,0-.32.2,3.46,3.46,0,0,1,.42.63,3.29,3.29,0,0,1,.36,1.47.31.31,0,0,0,.19-.06L10.37,6a2.9,2.9,0,0,1,.29-.19,3.89,3.89,0,0,1,.41-.17,1.55,1.55,0,0,1,.48-.07,1.1,1.1,0,0,1,.72.24.72.72,0,0,1,.23.26.8.8,0,0,1,.07.34,1,1,0,0,1-.25.67,7.71,7.71,0,0,1-.65.63,6.2,6.2,0,0,0-.48.43,2.93,2.93,0,0,0-.45.54,2.55,2.55,0,0,0-.33.66,2.62,2.62,0,0,0-.13.83v.35a.24.24,0,0,0,0,.12.35.35,0,0,0,.17.17l.12,0h1.71l.12,0a.23.23,0,0,0,.1-.07.21.21,0,0,0,.06-.1.27.27,0,0,0,0-.12V10.3a1,1,0,0,1,.26-.7q.27-.28.66-.63a5.79,5.79,0,0,0,.51-.48,4.51,4.51,0,0,0,.48-.6,2.56,2.56,0,0,0,.36-.72,2.81,2.81,0,0,0,.14-1A2.66,2.66,0,0,0,14.74,5Z"></path>
+      <path class="icon-component" fill="#fff" d="M12.38,12.15H10.5l-.12,0a.34.34,0,0,0-.18.29v1.82a.36.36,0,0,0,.08.23.23.23,0,0,0,.1.07l.12,0h1.88a.24.24,0,0,0,.12,0,.26.26,0,0,0,.11-.07.36.36,0,0,0,.07-.1.28.28,0,0,0,0-.13V12.46a.27.27,0,0,0,0-.12.61.61,0,0,0-.07-.1A.32.32,0,0,0,12.38,12.15Z"></path>
+
+      <path class="icon-component" fill="#fff" d="M6.79,12.15H4.91l-.12,0a.34.34,0,0,0-.18.29v1.82a.36.36,0,0,0,.08.23.23.23,0,0,0,.1.07l.12,0H6.79a.24.24,0,0,0,.12,0A.26.26,0,0,0,7,14.51a.36.36,0,0,0,.07-.1.28.28,0,0,0,0-.13V12.46a.27.27,0,0,0,0-.12.61.61,0,0,0-.07-.1A.32.32,0,0,0,6.79,12.15Z"></path>
+      <path class="icon-component" fill="#fff" d="M8.39,4A3.76,3.76,0,0,0,7.3,3.48a4.07,4.07,0,0,0-1.2-.19,3.92,3.92,0,0,0-1.18.17,5.87,5.87,0,0,0-.9.37,3.37,3.37,0,0,0-.55.38l-.21.19a.32.32,0,0,0,0,.41l1,1.2a.26.26,0,0,0,.2.12.48.48,0,0,0,.24-.06L4.78,6a2.9,2.9,0,0,1,.29-.19l.4-.17A1.66,1.66,0,0,1,6,5.56a1.1,1.1,0,0,1,.72.24.72.72,0,0,1,.23.26A.77.77,0,0,1,7,6.4a1,1,0,0,1-.26.67,7.6,7.6,0,0,1-.64.63,6.28,6.28,0,0,0-.49.43,2.93,2.93,0,0,0-.45.54,2.72,2.72,0,0,0-.33.66,2.62,2.62,0,0,0-.13.83v.35a.43.43,0,0,0,0,.12.39.39,0,0,0,.08.1.18.18,0,0,0,.1.07.21.21,0,0,0,.12,0H6.72l.12,0a.23.23,0,0,0,.1-.07.36.36,0,0,0,.07-.1.5.5,0,0,0,0-.12V10.3a1,1,0,0,1,.27-.7A8,8,0,0,1,8,9c.18-.15.35-.31.52-.48A7,7,0,0,0,9,7.89a3.23,3.23,0,0,0,.36-.72,3.07,3.07,0,0,0,.13-1A2.66,2.66,0,0,0,9.15,5,2.58,2.58,0,0,0,8.39,4Z"></path>
+      </symbol>
+         
+      <symbol id="icon-brilliant" viewBox="0 0 20 20">
+
+        <path class="icon-component" fill="#fff" d="M12.57,14.1a.51.51,0,0,1,0,.13.44.44,0,0,1-.08.11l-.11.08-.13,0h-2l-.13,0L10,14.34A.41.41,0,0,1,10,14.1V12.2A.32.32,0,0,1,10,12a.39.39,0,0,1,.1-.08l.13,0h2a.31.31,0,0,1,.24.1.39.39,0,0,1,.08.1.51.51,0,0,1,0,.13Zm-.12-3.93a.17.17,0,0,1,0,.12.41.41,0,0,1-.07.11.4.4,0,0,1-.23.08H10.35a.31.31,0,0,1-.34-.31L9.86,3.4A.36.36,0,0,1,10,3.16a.23.23,0,0,1,.11-.08.27.27,0,0,1,.13,0H12.3a.32.32,0,0,1,.25.1.36.36,0,0,1,.09.24Z"></path>
+      <path class="icon-component" fill="#fff" d="M8.07,14.1a.51.51,0,0,1,0,.13.44.44,0,0,1-.08.11l-.11.08-.13,0h-2l-.13,0-.11-.08a.41.41,0,0,1-.08-.24V12.2a.27.27,0,0,1,0-.13.36.36,0,0,1,.07-.1.39.39,0,0,1,.1-.08l.13,0h2A.31.31,0,0,1,8,12a.39.39,0,0,1,.08.1.51.51,0,0,1,0,.13ZM8,10.17a.17.17,0,0,1,0,.12.41.41,0,0,1-.07.11.4.4,0,0,1-.23.08H5.85a.31.31,0,0,1-.34-.31L5.36,3.4a.36.36,0,0,1,.09-.24.23.23,0,0,1,.11-.08.27.27,0,0,1,.13,0H7.8a.35.35,0,0,1,.25.1.36.36,0,0,1,.09.24Z"></path>
+      </symbol>
+
+      <symbol id="icon-greatFind" viewBox="0 0 20 20">
+         <path class="icon-component" fill="#fff" d="M10.32,14.1a.27.27,0,0,1,0,.13.44.44,0,0,1-.08.11l-.11.08-.13,0H8l-.13,0-.11-.08a.41.41,0,0,1-.08-.24V12.2a.27.27,0,0,1,0-.13.36.36,0,0,1,.07-.1.39.39,0,0,1,.1-.08l.13,0h2a.31.31,0,0,1,.24.1.39.39,0,0,1,.08.1.51.51,0,0,1,0,.13Zm-.12-3.93a.17.17,0,0,1,0,.12.41.41,0,0,1-.07.11.4.4,0,0,1-.23.08H8.1a.31.31,0,0,1-.34-.31L7.61,3.4a.36.36,0,0,1,.09-.24.23.23,0,0,1,.11-.08.27.27,0,0,1,.13,0h2.11a.32.32,0,0,1,.25.1.36.36,0,0,1,.09.24Z"></path>      
+                    </symbol>
+
+      <symbol id="icon-best" viewBox="0 0 20 20">
+        <path class="icon-component" fill="#fff" d="M9,2.93A.5.5,0,0,0,8.73,3a.46.46,0,0,0-.17.22L7.24,6.67l-3.68.19A.52.52,0,0,0,3.3,7a.53.53,0,0,0-.16.23.45.45,0,0,0,0,.28.44.44,0,0,0,.15.23L6.15,10l-1,3.56a.45.45,0,0,0,0,.28.46.46,0,0,0,.17.22.41.41,0,0,0,.26.09.43.43,0,0,0,.27-.08l3.09-2,3.09,2a.46.46,0,0,0,.53,0,.46.46,0,0,0,.17-.22.53.53,0,0,0,0-.28l-1-3.56L14.71,7.7a.44.44,0,0,0,.15-.23.45.45,0,0,0,0-.28A.53.53,0,0,0,14.7,7a.52.52,0,0,0-.26-.1l-3.68-.2L9.44,3.23A.46.46,0,0,0,9.27,3,.5.5,0,0,0,9,2.93Z"></path>   
+        </symbol>
+
+      <symbol id="icon-excellent" viewBox="0 0 20 20">
+        <path class="icon-component" fill="#fff" d="M13.79,10.84c0-.2.4-.53.4-.94S14,9.22,14,9.08a2.06,2.06,0,0,0,.18-.83,1,1,0,0,0-.3-.69,1.13,1.13,0,0,0-.55-.2,10.29,10.29,0,0,1-2.07,0c-.37-.23,0-1.18.18-1.7s.51-2.12-.77-2.43c-.69-.17-.66.37-.78.9-.05.21-.09.43-.13.57A5,5,0,0,1,7.05,7.73a1.57,1.57,0,0,1-.42.18v4.94A7.23,7.23,0,0,1,8,13c.52.12.91.25,1.44.33a11.11,11.11,0,0,0,1.62.16,6.65,6.65,0,0,0,1.18,0,1.09,1.09,0,0,0,1-.59.66.66,0,0,0,.06-.2,1.63,1.63,0,0,1,.07-.3c.13-.28.37-.3.5-.68S13.74,11,13.79,10.84Z"></path>
+      <path class="icon-component" fill="#fff" d="M5.49,7.59H4.31a.5.5,0,0,0-.5.5v4.56a.5.5,0,0,0,.5.5H5.49a.5.5,0,0,0,.5-.5V8.09A.5.5,0,0,0,5.49,7.59Z"></path>
+        </symbol>
+
+        
+      <symbol id="icon-good" viewBox="0 0 20 20">
+         <path class="icon-component-shadow" opacity="0.2" d="M15.11,6.81,9.45,12.47,7.79,14.13a.39.39,0,0,1-.28.11.39.39,0,0,1-.27-.11L2.89,9.78a.39.39,0,0,1-.11-.28.39.39,0,0,1,.11-.27L4.28,7.85a.34.34,0,0,1,.12-.09l.15,0a.37.37,0,0,1,.15,0,.38.38,0,0,1,.13.09l2.69,2.68,5.65-5.65a.38.38,0,0,1,.13-.09.37.37,0,0,1,.15,0,.4.4,0,0,1,.15,0,.34.34,0,0,1,.12.09l1.39,1.38a.41.41,0,0,1,.08.13.33.33,0,0,1,0,.15.4.4,0,0,1,0,.15A.5.5,0,0,1,15.11,6.81Z"></path>
+                    <path class="icon-component" fill="#fff" d="M15.11,6.31,9.45,12,7.79,13.63a.39.39,0,0,1-.28.11.39.39,0,0,1-.27-.11L2.89,9.28A.39.39,0,0,1,2.78,9a.39.39,0,0,1,.11-.27L4.28,7.35a.34.34,0,0,1,.12-.09l.15,0a.37.37,0,0,1,.15,0,.38.38,0,0,1,.13.09L7.52,10l5.65-5.65a.38.38,0,0,1,.13-.09.37.37,0,0,1,.15,0,.4.4,0,0,1,.15,0,.34.34,0,0,1,.12.09l1.39,1.38a.41.41,0,0,1,.08.13.33.33,0,0,1,0,.15.4.4,0,0,1,0,.15A.5.5,0,0,1,15.11,6.31Z"></path>
+      </symbol>
+      
+      <symbol id="icon-book" viewBox="0 0 20 20">
+        <path class="icon-component" fill="#fff" d="M8.45,5.4c-1-.75-2.51-1.09-4.83-1.09H3V13h.58a8.09,8.09,0,0,1,4.83,1.17Z"></path>
+  <path class="icon-component" fill="#fff" d="M9.54,14.19A8.14,8.14,0,0,1,14.38,13H15V4.31h-.58c-2.31,0-3.81.34-4.84,1.09Z"></path>  
+
+
+      </symbol>
+
+      <symbol id="icon-forced" viewBox="0 0 20 20">
+        <path class="icon-component" fill="#fff" d="M14.39,8.57,9,3.81a.31.31,0,0,0-.3,0,.32.32,0,0,0-.13.1A.29.29,0,0,0,8.5,4V6.92H3.9a.58.58,0,0,0-.19,0,.5.5,0,0,0-.17.11.91.91,0,0,0-.11.16.63.63,0,0,0,0,.19v3.41a.58.58,0,0,0,0,.19.64.64,0,0,0,.11.16.39.39,0,0,0,.17.11.41.41,0,0,0,.19,0H8.5v2.74a.26.26,0,0,0,.16.26.3.3,0,0,0,.16,0A.34.34,0,0,0,9,14.29l5.42-4.76a.69.69,0,0,0,.16-.22.7.7,0,0,0,0-.52A.69.69,0,0,0,14.39,8.57Z"></path>
+      </symbol>
+
+      <symbol id="icon-winner" viewBox="0 0 20 20">
+        <!-- #83b84f -->
+        <path d="m 24.4334,39.6517 c 15.9034,0 22.8584,-4.7017 22.8584,-4.7017 l 0.975,-23.6167 c 0,-2.16663 -1.495,-2.79497 -3.25,-1.4083 L 34.1834,17.53 26.6868,2.66667 C 26.0151,0.911667 25.1484,0.5 24.5201,0.5 23.8918,0.5 22.9384,0.955 22.3534,2.66667 L 14.6834,17.53 3.85008,9.925 C 2.09508,8.53833 0.513416,9.16667 0.600083,11.3333 L 1.57508,34.95 c 0,0 6.955,4.55 22.85832,4.7017 z" fill="white" style="fill:#ffffff;fill-opacity:1)" id="path1" transform="matrix(0.25173118,0,0,0.25173118,2.8497971,2.8741344)"></path>
+      </symbol>
+
+      <symbol id="icon-resign" viewBox="0 0 20 20">
+        <!-- #e02828 -->
+        <path d="M 4.1166627,5.4628911 C 4.0978684,5.3907765 4.0650542,5.3230701 4.0200928,5.2636365 3.9751319,5.2041998 3.9189029,5.1542038 3.8546188,5.1164993 3.7247928,5.0403508 3.5700345,5.0188935 3.4243877,5.0568504 3.3522707,5.0756446 3.2845643,5.1084589 3.2251276,5.1534202 3.1656931,5.1983811 3.115696,5.2546101 3.0779912,5.3188916 3.001843,5.448713 2.9803873,5.6034758 3.0183435,5.7491277 l 2.329766,8.6866993 c 0.01457,0.07524 0.04445,0.146674 0.087786,0.209878 0.043333,0.0632 0.099198,0.116846 0.1641237,0.157559 0.064951,0.04071 0.1375394,0.06762 0.2133234,0.07911 0.075759,0.01148 0.1530907,0.0072 0.2271523,-0.01241 0.07409,-0.01967 0.1433304,-0.05434 0.2034382,-0.101894 0.060109,-0.04752 0.1097821,-0.106936 0.1459767,-0.174483 0.036192,-0.06755 0.058111,-0.141808 0.064403,-0.218191 0.00626,-0.07638 -0.00317,-0.15324 -0.02786,-0.225804 z" fill="white" style="fill:#ffffff;fill-opacity:1;stroke-width:0.249618" id="path1"></path>
+        <path d="M 14.467491,6.7409343 C 14.334345,6.1485165 14.15462,5.5960374 13.994864,4.9969421 L 13.45569,3 c -0.451783,0.4941833 -1.044201,0.8380118 -1.6974,0.985159 -0.544991,0.1279266 -1.104735,0.1816643 -1.664103,0.1597553 -0.5525038,0 -1.0916782,-0.039939 -1.6374927,-0.046596 C 7.8971265,4.0817857 7.3377825,4.137723 6.7925673,4.2647309 6.1388934,4.4077545 5.5444039,4.7467926 5.088507,5.2365754 L 5.6276764,7.2335301 6.093638,8.9775093 c 0.1397858,0.5125652 0.2862366,1.0517387 0.4526316,1.6840957 0,0.106513 0.059911,0.213 0.086543,0.319512 C 7.091185,10.489718 7.6875722,10.14859 8.3435177,10.002614 8.889532,9.8809508 9.4484757,9.8272835 10.007645,9.8428592 c 0.545839,0 1.085013,0.046599 1.630828,0.053242 0.561465,0.018619 1.123005,-0.035069 1.670766,-0.1597549 C 13.95882,9.5848047 14.547867,9.2415815 15,8.7511824 14.793641,7.9790383 14.627246,7.3400171 14.467491,6.7409343 Z" fill="white" style="fill:#ffffff;fill-opacity:1;stroke-width:0.249618" id="path2"></path>
+      </symbol>
+
+      <symbol id="back-nav" viewBox="0 0 24 24">
+        <path xmlns="http://www.w3.org/2000/svg" d="M20.0701 10C21.6701 10 22.0001 10.33 22.0001 11.93V12.06C22.0001 13.66 21.6701 13.99 20.0701 13.99H4.50012V9.99L20.0701 10ZM11.9301 21.13L11.8601 21.2C10.7301 22.33 10.2601 22.33 9.13012 21.2L2.73012 14.83C1.00012 13.06 1.00012 10.93 2.73012 9.16L9.13012 2.79C10.2601 1.66 10.7301 1.66 11.8601 2.79L11.9301 2.86001C13.0601 3.99001 13.0601 4.46001 11.9301 5.59001L5.56012 11.99L11.9301 18.39C13.0601 19.52 13.0601 19.99 11.9301 21.12V21.13Z"></path>
+      </symbol>
+         
+      <symbol id="flip-btn-svg" viewBox="0 0 24 24">
+        <path xmlns="http://www.w3.org/2000/svg" d="M18 8.13C18 6.53 17.47 6 15.87 6H13.44C12.41 6 12.01 5.6 12.01 4.57V4.44C12.01 3.41 12.41 3.01 13.44 3.01H15.67C19.67 3.01 21 4.34 21 8.34V17.17H18V8.13ZM10.57 21H8.34C4.34 21 3.01 19.67 3.01 15.67V6.84H6.01V15.87C6.01 17.47 6.54 18 8.14 18H10.57C11.6 18 12 18.4 12 19.43V19.56C12 20.59 11.6 20.99 10.57 20.99V21ZM0.429999 5.83L3.63 1.76C4.3 0.929997 4.76 0.929997 5.43 1.76L8.63 5.86C9.2 6.56 8.96 6.99 8.06 6.99H0.989999C0.0599991 6.99 -0.140001 6.56 0.419999 5.82L0.429999 5.83ZM23.57 18.17L20.37 22.24C19.7 23.07 19.24 23.07 18.57 22.24L15.37 18.14C14.8 17.44 15.04 17.01 15.94 17.01H23.01C23.94 17.01 24.14 17.44 23.58 18.18L23.57 18.17Z"></path>
+
+      </symbol>
+
+
+
+
+  </svg>
+
+
+
+
+
+
+
+
+</body>
+</html>
