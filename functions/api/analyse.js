@@ -31,10 +31,10 @@ export async function onRequest(context) {
     
     if (msg.data.startsWith('{"action":"analyzeGame"')){
     const obj = JSON.parse(msg.data) // convert string to object
-    const value = obj.data 
+    
       
       resolve(
-        new Response(obj.data, {
+        new Response(JSON.stringify(value), {
           headers: { "Content-Type": "application/json" },
         })
       )
