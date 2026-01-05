@@ -423,14 +423,14 @@ document.querySelector('.tab-btn[data-tab="analysis"]').classList.remove('hidden
     }
     return response.json();
   })
-  .then(data.data => {
+  .then(data => {
     
     // console.log(data.positions[0].classificationName);
     // console.log("history index is",historyIndex , data.positions.);
     // document.getElementById('move-feedback-text').textContent = data.positions[historyIndex+1].classificationName;
 
     // window.analysisData=data.positions;
-    analysisdata=data;
+    analysisdata=data.data;
     analysisdata.positions[0].playedMove={speech:{personal: null}};
     window.analysisdata=analysisdata;
 
