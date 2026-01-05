@@ -9,12 +9,7 @@ export async function onRequest(context) {
 
   const wsUrl = "wss://analysis.chess.com/"
 
-  const ws = new WebSocket(wsUrl, {
-    headers: {
-      "User-Agent":
-        "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/132.0.0.0 Mobile Safari/537.36",
-    },
-  })
+  const ws = new WebSocket()
 
   return new Promise((resolve, reject) => {
     ws.onopen = () => {
