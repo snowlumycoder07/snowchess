@@ -1,3 +1,5 @@
+import { gentoken } from "./gentoken.js"
+
 export async function onRequest(context) {
   const { request } = context
   
@@ -5,7 +7,9 @@ export async function onRequest(context) {
     return new Response("Method Not Allowed", { status: 405 })
   }
 
-  const { token, pgn }= await request.json()
+  const { pgn }= await request.json()
+  
+  const token= await gentoken()
 
   const wsUrl = "wss://analysis.chess.com/"
 
