@@ -9,7 +9,7 @@ export async function onRequest(context) {
 
   const { pgn }= await request.json()
   
-  const token= await gentoken()
+  const token= await gentoken().body
 
   const wsUrl = "wss://analysis.chess.com/"
 
