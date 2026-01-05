@@ -32,7 +32,7 @@ export async function onRequest(context) {
     if (msg.data.startsWith('{"action":"analyzeGame"')){
       
       resolve(
-        new Response(msg.data+typeof(msg.data), {
+        new Response(msg.data, {
           headers: { "Content-Type": "application/json" },
         })
       )
