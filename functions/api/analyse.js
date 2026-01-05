@@ -5,7 +5,7 @@ export async function onRequest(context) {
     return new Response("Method Not Allowed", { status: 405 })
   }
 
-  const { token, pgn }= request.json()
+  const { token, pgn }= await request.json()
 
   const wsUrl = "wss://analysis.chess.com/"
 
