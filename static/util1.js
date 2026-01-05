@@ -410,7 +410,7 @@ function analysisrender(pgnInput){
 document.querySelector('.tab-btn[data-tab="analysis"]').classList.remove('hidden');
 
 
-  fetch('https://timtim.topvipssh.net/analyse', {
+  fetch('/api/analyse', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -571,7 +571,7 @@ document.getElementById('search-btn').addEventListener('click', () => {
 
   value=document.getElementById('idInput').value;
   console.log(value);
-  fetch(`/archive?username=${value}`)
+  fetch(`/api/archive?username=${value}`)
     .then(res => {
       if (!res.ok) {
         throw new Error('Failed to fetch user data');
@@ -612,7 +612,7 @@ searchResultContainer.addEventListener('click', (event) => {
   // console.log(gameFen);
 
   // Fetch game details
-  fetch(`https://timtim.topvipssh.net/game?gameid=${gameId}&isLive=${isLive}`)
+  fetch(`/api/game?gameid=${gameId}&isLive=${isLive}`)
     .then(response => {
       if (!response.ok) {
         throw new Error('Network response was not ok');
