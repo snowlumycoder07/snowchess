@@ -30,11 +30,11 @@ export async function onRequest(context) {
     ws.onmessage = (msg) => {
     
     if (msg.data.startsWith('{"action":"analyzeGame"')){
-    const obj = JSON.parse(msg.data) // convert string to object
+    
     
       
       resolve(
-        new Response(JSON.stringify(value), {
+        new Response(msg.data, {
           headers: { "Content-Type": "application/json" },
         })
       )
