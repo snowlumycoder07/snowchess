@@ -22,6 +22,7 @@ export async function onRequest(context) {
 
     ws.onmessage = (msg) => {
     
+    if (msg.data.startsWith('{"action":"analyzeGame"')){
       
       resolve(
         new Response(msg.data+typeof(msg.data), {
@@ -29,6 +30,7 @@ export async function onRequest(context) {
         })
       )
       ws.close()
+    }
     }
     
 
