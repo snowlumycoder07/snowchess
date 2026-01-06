@@ -1,0 +1,12 @@
+name = "snowchess"    # Your project name
+type = "javascript"             # or "typescript"
+account_id = "c5b3c57bc97c864ba1e2b1e6fec8016e"  # From Cloudflare dashboard
+
+[build]
+command = "npm run build"       # Optional, remove if static
+upload.format = "service-worker"
+
+[bindings]
+type = "d1_database"
+name = "my-database"                   # Variable your functions use
+database_name = "my-database"          # D1 database name
