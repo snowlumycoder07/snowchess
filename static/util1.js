@@ -138,7 +138,7 @@ import { Chessground } from '/static/chessground.min.js';
           
           const posi=analysisdata.positions[historyIndex];
           const classificationtype=posi.classificationName;
-          feedbacktextupdate(classificationtype, Object.values(analysisdata.positions[historyIndex].playedMove.speech)[cg.state.orientation=="white"?(historyIndex%2==0?0:1):(historyIndex%2!=0?0:1)], analysisdata.positions[historyIndex].playedMove.score);
+          feedbacktextupdate(classificationtype, Object.values(analysisdata.positions[historyIndex].playedMove.speech)[cg.state.orientation=="black"?(historyIndex%2==0?0:1):(historyIndex%2!=0?0:1)], analysisdata.positions[historyIndex].playedMove.score);
           
           if(posi.playedMove.moveLan!=posi.suggestedMove.moveLan){
 
@@ -229,7 +229,7 @@ import { Chessground } from '/static/chessground.min.js';
         custom = last ? new Map([[last[1], [`${classificationtype} customsq`]]]) : new Map();
 
         // console.log("history index before is",historyIndex);
-  feedbacktextupdate(classificationtype, Object.values(analysisdata.positions[historyIndex+1].playedMove.speech)[cg.state.orientation=="white"?(historyIndex+1)%2==0?0:1:(historyIndex+1)%2!=0?0:1], analysisdata.positions[historyIndex+1].playedMove.score);
+  feedbacktextupdate(classificationtype, Object.values(analysisdata.positions[historyIndex+1].playedMove.speech)[cg.state.orientation=="black"?(historyIndex+1)%2==0?0:1:(historyIndex+1)%2!=0?0:1], analysisdata.positions[historyIndex+1].playedMove.score);
           }catch(e){
             console.log(e);
           }
@@ -768,7 +768,7 @@ document.getElementById('startBtn').addEventListener('click', () => {
   // chess.load(historyfen[0]);
   updateclock(0);
   try {
-  feedbacktextupdate(analysisdata.positions[historyIndex].classificationName, Object.values(analysisdata.positions[historyIndex].playedMove.speech)[cg.state.orientation=="white"?(historyIndex%2==0?0:1):(historyIndex%2!=0?0:1)], analysisdata.positions[historyIndex].playedMove.score);
+  feedbacktextupdate(analysisdata.positions[historyIndex].classificationName, Object.values(analysisdata.positions[historyIndex].playedMove.speech)[cg.state.orientation=="black"?(historyIndex%2==0?0:1):(historyIndex%2!=0?0:1)], analysisdata.positions[historyIndex].playedMove.score);
   }catch(e){
     console.log(e);
   }
@@ -810,7 +810,7 @@ document.getElementById('endBtn').addEventListener('click', () => {
   try {
 
     const classificationtype=analysisdata.positions[historyIndex].classificationName;
-    feedbacktextupdate(classificationtype, Object.values(analysisdata.positions.at(-1).playedMove.speech)[cg.state.orientation=="white"?(historyIndex%2==0?0:1):(historyIndex%2!=0?0:1)], analysisdata.positions[historyIndex].playedMove.score);
+    feedbacktextupdate(classificationtype, Object.values(analysisdata.positions.at(-1).playedMove.speech)[cg.state.orientation=="black"?(historyIndex%2==0?0:1):(historyIndex%2!=0?0:1)], analysisdata.positions[historyIndex].playedMove.score);
     last =historyIndex > 0 ? [history[historyIndex - 1].from, history[historyIndex - 1].to] : null;
     custom = last ? new Map([[last[1], [`${classificationtype} customsq`]]]) : new Map();
                 
